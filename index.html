@@ -80,6 +80,7 @@
     transform: translateY(26px) scale(0.985);
     transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), visibility 0s linear 0.7s;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;   /* no pull-to-refresh stealing the swipe */
     scrollbar-width: none;
   }
   .screen::-webkit-scrollbar { width: 0; height: 0; }
@@ -880,32 +881,29 @@
      ========================================================= */
   var letterScreen = screens[1];
   var smoothTarget = 0;
-  var touching = false;
 
-  function maxScroll(el) { return Math.max(0, el.scrollHeight - el.clientHeight); }
+  /* Eased scrolling is a MOUSE WHEEL affordance only. A finger already
+     gets momentum from the OS, and any attempt to ease on top of it
+     fights the fling the instant the finger lifts. So on touch we
+     attach nothing at all and let the platform do its job. */
+  var wheelDevice = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-  letterScreen.addEventListener("wheel", function (e) {
-    if (reduce) return;
-    e.preventDefault();
-    smoothTarget = Math.max(0, Math.min(maxScroll(letterScreen), smoothTarget + e.deltaY * 0.9));
-  }, { passive: false });
+  if (!reduce && wheelDevice) {
+    letterScreen.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      var max = Math.max(0, letterScreen.scrollHeight - letterScreen.clientHeight);
+      smoothTarget = Math.max(0, Math.min(max, smoothTarget + e.deltaY * 0.9));
+    }, { passive: false });
 
-  letterScreen.addEventListener("touchstart", function () {
-    touching = true; smoothTarget = letterScreen.scrollTop;
-  }, { passive: true });
-  letterScreen.addEventListener("touchend", function () {
-    touching = false; smoothTarget = letterScreen.scrollTop;
-  }, { passive: true });
-
-  function glide() {
-    requestAnimationFrame(glide);
-    if (reduce || touching || current !== 1) return;
-    var cur = letterScreen.scrollTop;
-    var d = smoothTarget - cur;
-    if (Math.abs(d) < 0.35) return;
-    letterScreen.scrollTop = cur + d * 0.062;
+    (function glide() {
+      requestAnimationFrame(glide);
+      if (current !== 1) return;
+      var cur = letterScreen.scrollTop;
+      var d = smoothTarget - cur;
+      if (Math.abs(d) < 0.35) return;
+      letterScreen.scrollTop = cur + d * 0.062;
+    })();
   }
-  requestAnimationFrame(glide);
 
   /* =========================================================
      THE SEAL, THE BED, AND THE LETTER
