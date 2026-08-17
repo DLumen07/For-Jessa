@@ -1,4 +1,6 @@
 <title>Roses For Jessa</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 
 <style>
   /* ============================================================
@@ -310,19 +312,34 @@
   @keyframes eq { 0%, 100% { height: 4px; } 50% { height: 13px; } }
 
   @media (max-width: 768px) {
-    body { font-size: 16px; }
-    .inner { padding: 84px 20px 150px; gap: 18px; }
-    .back { top: 16px; left: 16px; }
-    .music { right: 14px; bottom: 16px; padding: 10px 16px 10px 13px; }
-    .btn { width: 100%; text-align: center; }
-    /* the letter keeps a gutter on each side so the roses show
-       around it, and reads small enough to hold a paragraph at a
-       glance on a phone */
-    .screen[data-screen="1"] .inner { padding-left: 7vw; padding-right: 7vw; }
-    .paper { padding: 30px 24px; }
-    .paper p { font-size: 0.95rem; line-height: 1.74; margin-bottom: 16px; }
-    .paper .lift { font-size: 1.06rem; padding-left: 16px; margin: 22px 0; }
-    .paper .ps { font-size: 0.85rem; }
+    body { font-size: 17px; }
+    .inner { padding: 76px 16px 130px; gap: 20px; }
+    .back { top: 14px; left: 14px; }
+    .music { right: 12px; bottom: 14px; padding: 10px 16px 10px 13px; }
+    .btn { width: 100%; text-align: center; font-size: 16px; padding: 17px 30px; }
+
+    /* Front page: the greeting sits centred in the upper half, well
+       clear of the rose below it, and reads large. */
+    .screen[data-screen="0"] .inner {
+      justify-content: center;
+      padding-top: 56px;
+      padding-bottom: 34vh;
+      gap: 18px;
+    }
+    h1 { font-size: clamp(2.4rem, 9vw, 3.2rem); }
+    .in-script { font-size: 1.42em; }
+    .lede { font-size: 1.14rem; max-width: 30ch; }
+
+    /* The letter takes the full width of her screen. */
+    .screen[data-screen="1"] .inner { padding-left: 14px; padding-right: 14px; }
+    .paper { padding: 32px 22px; }
+    .paper .date { font-size: 10.5px; margin-bottom: 26px; }
+    .paper .sal { font-size: 2.1rem; margin-bottom: 20px; }
+    .paper p { font-size: 1.06rem; line-height: 1.72; margin-bottom: 18px; }
+    .paper .lift { font-size: 1.22rem; padding-left: 16px; margin: 26px 0; }
+    .paper .ps { font-size: 0.95rem; }
+    .paper .sign-off { font-size: 1.6rem; }
+    .paper .sign-name { font-size: 2.2rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -591,9 +608,16 @@
   }
 
   function place(f) {
+    var narrow = W < 620;
     f.bx = f.nx * W;
     f.by = f.nby * H;
     f.h = f.nh * H;
+    /* the lone front-page rose sits lower and smaller on a phone so the
+       greeting above it keeps its room */
+    if (f.single) {
+      f.h *= narrow ? 0.80 : 1;
+      f.scale = narrow ? 1.1 : 1.5;
+    }
     f.baked = null;                 /* size changed, so the bake is stale */
   }
 
@@ -604,6 +628,7 @@
       scale: 1.5, alpha: 1, stemCol: "#456a54", band: 2, born: 0.35
     })];
     roses[0].v = VARIETIES[1];
+    roses[0].single = true;
     place(roses[0]);
   }
 
