@@ -1,5 +1,9 @@
 <title>Roses For Jessa</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- in-app browsers cache this page hard; these ask them not to -->
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 
 <style>
@@ -863,7 +867,6 @@
     current = n;
     var next = screens[current];
     next.scrollTop = 0;
-    smoothTarget = 0;
     next.classList.add("active");
     backBtn.classList.toggle("on", current > 0);
 
@@ -877,33 +880,17 @@
   backBtn.addEventListener("click", function () { go(current - 1); });
 
   /* =========================================================
-     SLOW SMOOTH SCROLL on the letter
+     SCROLLING
+     There is deliberately no scroll code here. An earlier version
+     eased the letter toward a target position every frame, which is
+     lovely with a mouse wheel and unusable with a thumb: the moment
+     the finger lifts, the loop drags the page back to where the
+     target still points. Guarding it by pointer type did not help,
+     because in-app webviews misreport themselves as fine-pointer
+     devices. The platform's own scrolling is smooth on both, so it
+     is left completely alone.
      ========================================================= */
   var letterScreen = screens[1];
-  var smoothTarget = 0;
-
-  /* Eased scrolling is a MOUSE WHEEL affordance only. A finger already
-     gets momentum from the OS, and any attempt to ease on top of it
-     fights the fling the instant the finger lifts. So on touch we
-     attach nothing at all and let the platform do its job. */
-  var wheelDevice = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-
-  if (!reduce && wheelDevice) {
-    letterScreen.addEventListener("wheel", function (e) {
-      e.preventDefault();
-      var max = Math.max(0, letterScreen.scrollHeight - letterScreen.clientHeight);
-      smoothTarget = Math.max(0, Math.min(max, smoothTarget + e.deltaY * 0.9));
-    }, { passive: false });
-
-    (function glide() {
-      requestAnimationFrame(glide);
-      if (current !== 1) return;
-      var cur = letterScreen.scrollTop;
-      var d = smoothTarget - cur;
-      if (Math.abs(d) < 0.35) return;
-      letterScreen.scrollTop = cur + d * 0.062;
-    })();
-  }
 
   /* =========================================================
      THE SEAL, THE BED, AND THE LETTER
